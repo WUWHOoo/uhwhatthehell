@@ -16,24 +16,25 @@
     .fallback { display: none; width: 100%; height: 100%; place-items: center; background: #fff; font-size: 18px; text-align: center; padding: 24px; }
     .photo.failed img { display: none; }
     .photo.failed .fallback { display: grid; }
-    button { position: absolute; top: max(20px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); z-index: 2; font: 700 16px Arial, sans-serif; color: #111; background: #fff; border: 1px solid #ddd; border-radius: 999px; padding: 12px 20px; cursor: pointer; }
-    button:hover { background: #f1f1f1; }
-    button:focus-visible, a:focus-visible { outline: 3px solid #111; outline-offset: 4px; }
+    .gas { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+    .puff { position: absolute; width: clamp(100px, 19vw, 260px); aspect-ratio: 1; opacity: 0; border-radius: 50%; background: radial-gradient(ellipse at 35% 55%, #8edc2a99, transparent 62%), radial-gradient(ellipse at 65% 40%, #40b51c99, transparent 65%), radial-gradient(ellipse at 50% 70%, #bedf3599, transparent 64%); filter: blur(12px); will-change: transform, opacity; }
+    @media (prefers-reduced-motion: reduce) { .gas { display: none; } }
     #status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   </style>
 </head>
 <body>
   <main class="stage" id="stage">
-    <button id="replay" type="button">Drop again</button>
     <div class="photo" id="photo">
       <img id="image" src="./pregnant_sans.png" alt="Uploaded Sans illustration" draggable="false">
       <span class="fallback" role="status">Image could not load. Please refresh.</span>
     </div>
+    <div class="gas" id="gas" aria-hidden="true"></div>
     <p id="status" role="status">Ready for a little gravity?</p>
   </main>
   <script>
     const stage = document.getElementById('stage');
     const photo = document.getElementById('photo');
+    const gas = document.getElementById('gas');
     const picture = document.getElementById('image');
     const status = document.getElementById('status');
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -43,8 +44,46 @@
     let ready = false;
     const transform = (y, x = 1, sy = 1, angle = 0) => `translateY(${y}px) scale(${x}, ${sy}) rotate(${angle}deg)`;
 
+    let gasFrame;
+    const gasAnimations = new Set();
+    function clearGas() {
+      cancelAnimationFrame(gasFrame);
+      gasAnimations.forEach(animation => animation.cancel());
+      gasAnimations.clear();
+      gas.replaceChildren();
+    }
+    function startGas(fall, current) {
+      let lastPuff = -Infinity;
+      function emit(now) {
+        if (current !== run || reducedMotion.matches || fall.playState === 'finished') return;
+        const box = photo.getBoundingClientRect();
+        if (now - lastPuff >= 65 && box.bottom > 0 && box.top < stage.clientHeight) {
+          lastPuff = now;
+          const puff = document.createElement('span');
+          puff.className = 'puff';
+          puff.style.left = (stage.clientWidth * (.5 + (Math.random() - .5) * .5)) + 'px';
+          puff.style.top = Math.min(stage.clientHeight - 10, box.bottom - 25) + 'px';
+          gas.appendChild(puff);
+          const drift = (Math.random() - .5) * stage.clientWidth * .3;
+          const rise = 90 + Math.random() * 160;
+          const smoke = puff.animate([
+            { opacity: 0, transform: 'translate(-50%, -50%) scale(.2)', offset: 0 },
+            { opacity: .8, transform: 'translate(-50%, -60%) scale(.8)', offset: .18 },
+            { opacity: .45, transform: `translate(calc(-50% + ${drift * .5}px), calc(-50% - ${rise * .5}px)) scale(1.3)`, offset: .55 },
+            { opacity: 0, transform: `translate(calc(-50% + ${drift}px), calc(-50% - ${rise}px)) scale(1.9)`, offset: 1 }
+          ], { duration: 1700 + Math.random() * 500, easing: 'ease-out' });
+          gasAnimations.add(smoke);
+          const removePuff = () => { puff.remove(); gasAnimations.delete(smoke); };
+          smoke.finished.then(removePuff, removePuff);
+        }
+        gasFrame = requestAnimationFrame(emit);
+      }
+      gasFrame = requestAnimationFrame(emit);
+    }
+
     function drop() {
       const current = ++run;
+      clearGas();
       animations.forEach(animation => animation.cancel());
       const size = photo.offsetHeight;
       const ground = 0;
@@ -69,6 +108,7 @@
         frame(1, ground, 1, 1, 0)
       ], { duration: 2300, fill: 'forwards' });
       animations = [fall];
+      startGas(fall, current);
       fall.finished.then(() => { if (run === current) status.textContent = 'Stuck the landing. Mostly.'; }).catch(() => {});
     }
     function begin() {
@@ -83,20 +123,20 @@
       if (!picture.naturalWidth) photo.classList.add('failed');
       begin();
     }
-    document.getElementById('replay').addEventListener('click', () => { started = true; drop(); });
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         if (!started) return;
         ++run;
+        clearGas();
         animations.forEach(animation => animation.cancel());
         photo.style.transform = transform(0);
         status.textContent = 'Stuck the landing. Mostly.';
       }, 150);
     });
     reducedMotion.addEventListener('change', () => { if (started) drop(); });
-    // Keep the interaction usable even if the remote photo is slow to arrive.
+    // Keep the interaction usable even if the image is slow to arrive.
     setTimeout(() => { if (!ready) begin(); }, 4000);
   </script>
 </body>
