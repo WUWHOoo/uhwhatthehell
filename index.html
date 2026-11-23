@@ -3,62 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#eaf0c9">
+  <meta name="theme-color" content="#ffffff">
   <meta name="description" content="One photo. A little gravity. A very cartoon landing.">
   <title>Down we go.</title>
   <style>
-    :root { color-scheme: light; font-family: Arial, Helvetica, sans-serif; color: #223b30; background: #eaf0c9; }
+    :root { color-scheme: light; font-family: Arial, sans-serif; color: #111; background: #fff; }
     * { box-sizing: border-box; }
-    body { margin: 0; }
-    .stage { height: 100svh; min-height: 480px; position: relative; overflow: hidden; isolation: isolate; }
-    header { position: absolute; inset: 28px 36px auto; display: flex; justify-content: space-between; align-items: center; gap: 20px; z-index: 2; }
-    .wordmark { font-weight: 800; font-size: 18px; letter-spacing: -.6px; }
-    button { font: inherit; font-size: 16px; font-weight: 700; color: #223b30; border: 1.5px solid #223b30; background: transparent; border-radius: 999px; padding: 13px 22px; cursor: pointer; transition: background .15s, color .15s; }
-    button:hover { background: #223b30; color: #eaf0c9; }
-    button:focus-visible, a:focus-visible { outline: 3px solid #b65122; outline-offset: 5px; }
-    .intro { position: absolute; top: 24%; left: 8%; pointer-events: none; }
-    h1 { margin: 0; font-size: clamp(56px, 7.8vw, 124px); line-height: .88; font-weight: 800; letter-spacing: -.075em; }
-    .intro p { font-size: 17px; line-height: 1.5; margin-top: 26px; max-width: 240px; }
-    .photo { --size: clamp(140px, 18vw, 215px); position: absolute; left: 69%; top: 0; width: var(--size); height: var(--size); margin-left: calc(var(--size) / -2); background: #fffef6; border: 8px solid #fffef6; border-radius: 17px; box-shadow: 0 7px 0 #223b3014; transform: translateY(-300px); transform-origin: center bottom; will-change: transform; }
-    .photo img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
-    .fallback { display: none; height: 100%; place-items: center; font-size: 85px; background: #89b9d3; border-radius: 9px; }
+    html, body { margin: 0; width: 100%; height: 100%; background: #fff; overflow: hidden; }
+    .stage { width: 100%; height: 100dvh; position: relative; overflow: hidden; background: #fff; isolation: isolate; }
+    .photo { position: absolute; inset: 0; width: 100%; height: 100%; transform: translateY(-170%); transform-origin: center bottom; will-change: transform; }
+    .photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .fallback { display: none; width: 100%; height: 100%; place-items: center; background: #fff; font-size: clamp(100px, 35vmin, 400px); }
     .photo.failed img { display: none; }
     .photo.failed .fallback { display: grid; }
-    .shadow { position: absolute; left: 69%; bottom: 86px; width: 165px; height: 15px; margin-left: -82.5px; background: #223b30; border-radius: 50%; opacity: 0; filter: blur(4px); z-index: -1; }
-    .floor { position: absolute; left: 36px; right: 36px; bottom: 94px; height: 1px; background: #223b3050; z-index: -1; }
-    footer { position: absolute; left: 36px; right: 36px; bottom: 28px; display: flex; justify-content: space-between; gap: 20px; align-items: center; font-size: 14px; line-height: 1.4; }
-    footer p { margin: 0; }
-    footer a { color: inherit; text-underline-offset: 3px; }
-    #status { font-weight: 700; }
-    @media (max-width: 620px) {
-      header { inset: 22px 22px auto; }
-      .intro { top: 125px; left: 24px; }
-      h1 { font-size: clamp(52px, 13vw, 76px); }
-      .intro p { margin-top: 17px; max-width: 180px; font-size: 16px; }
-      .photo, .shadow { left: 70%; }
-      .photo { --size: 128px; border-width: 6px; border-radius: 14px; }
-      .floor { left: 22px; right: 22px; }
-      footer { left: 22px; right: 22px; font-size: 13px; }
-      button { padding: 11px 16px; }
-    }
+    button { position: absolute; top: max(20px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); z-index: 2; font: 700 16px Arial, sans-serif; color: #111; background: #fff; border: 1px solid #ddd; border-radius: 999px; padding: 12px 20px; cursor: pointer; }
+    button:hover { background: #f1f1f1; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #111; outline-offset: 4px; }
+    .credit { position: absolute; z-index: 2; right: max(20px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); margin: 0; padding: 6px 10px; background: #fff; color: #111; border-radius: 6px; font-size: 13px; }
+    .credit a { color: inherit; text-underline-offset: 3px; }
+    #status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   </style>
 </head>
 <body>
   <main class="stage" id="stage">
-    <header><span class="wordmark">a little gravity.</span><button id="replay" type="button">Drop again</button></header>
-    <div class="intro"><h1>down<br>we go.</h1><p>A perfectly ordinary photo.<br>A slightly dramatic landing.</p></div>
-    <div class="shadow" id="shadow" aria-hidden="true"></div>
+    <button id="replay" type="button">Drop again</button>
     <div class="photo" id="photo">
-      <img id="image" src="https://images.unsplash.com/photo-1557800636-894a64c1696f?auto=format&amp;fit=crop&amp;w=600&amp;q=85" alt="Bright orange fruit against a blue background" draggable="false">
+      <img id="image" src="https://images.unsplash.com/photo-1557800636-894a64c1696f?auto=format&amp;fit=crop&amp;w=2400&amp;q=85" alt="Bright orange fruit against a blue background" draggable="false">
       <span class="fallback" role="img" aria-label="An orange">🍊</span>
     </div>
-    <div class="floor" aria-hidden="true"></div>
-    <footer><p id="status" role="status">Ready for a little gravity?</p><p>Photo by <a href="https://unsplash.com/photos/orange-fruit-U1iYwZ8Dx7k" target="_blank" rel="noopener noreferrer">Mae Mu / Unsplash</a></p></footer>
+    <p id="status" role="status">Ready for a little gravity?</p>
+    <p class="credit">Photo by <a href="https://unsplash.com/photos/orange-fruit-U1iYwZ8Dx7k" target="_blank" rel="noopener noreferrer">Mae Mu / Unsplash</a></p>
   </main>
   <script>
     const stage = document.getElementById('stage');
     const photo = document.getElementById('photo');
-    const shadow = document.getElementById('shadow');
     const picture = document.getElementById('image');
     const status = document.getElementById('status');
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -72,11 +50,9 @@
       const current = ++run;
       animations.forEach(animation => animation.cancel());
       const size = photo.offsetHeight;
-      const ground = stage.clientHeight - 94 - size;
-      const bounce = Math.min(125, ground * .24);
+      const ground = 0;
+      const bounce = stage.clientHeight * .16;
       photo.style.transform = transform(ground);
-      shadow.style.opacity = '.17';
-      shadow.style.transform = 'scaleX(1)';
       status.textContent = reducedMotion.matches ? 'A soft landing.' : 'Here we go…';
       if (reducedMotion.matches) {
         animations = [photo.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180 })];
@@ -95,16 +71,7 @@
         frame(.93, ground, 1.09, .91, 0, 'ease-out'),
         frame(1, ground, 1, 1, 0)
       ], { duration: 2300, fill: 'forwards' });
-      const shade = shadow.animate([
-        { opacity: 0, transform: 'scaleX(.2)', offset: 0 },
-        { opacity: .2, transform: 'scaleX(1)', offset: .38 },
-        { opacity: .24, transform: 'scaleX(1.4)', offset: .44 },
-        { opacity: .08, transform: 'scaleX(.6)', offset: .63 },
-        { opacity: .2, transform: 'scaleX(1.2)', offset: .79 },
-        { opacity: .13, transform: 'scaleX(.8)', offset: .87 },
-        { opacity: .17, transform: 'scaleX(1)', offset: 1 }
-      ], { duration: 2300, fill: 'forwards' });
-      animations = [fall, shade];
+      animations = [fall];
       fall.finished.then(() => { if (run === current) status.textContent = 'Stuck the landing. Mostly.'; }).catch(() => {});
     }
     function begin() {
@@ -127,7 +94,7 @@
         if (!started) return;
         ++run;
         animations.forEach(animation => animation.cancel());
-        photo.style.transform = transform(stage.clientHeight - 94 - photo.offsetHeight);
+        photo.style.transform = transform(0);
         status.textContent = 'Stuck the landing. Mostly.';
       }, 150);
     });
