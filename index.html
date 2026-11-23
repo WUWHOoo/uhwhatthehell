@@ -13,14 +13,12 @@
     .stage { width: 100%; height: 100dvh; position: relative; overflow: hidden; background: #fff; isolation: isolate; }
     .photo { position: absolute; inset: 0; width: 100%; height: 100%; transform: translateY(-170%); transform-origin: center bottom; will-change: transform; }
     .photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
-    .fallback { display: none; width: 100%; height: 100%; place-items: center; background: #fff; font-size: clamp(100px, 35vmin, 400px); }
+    .fallback { display: none; width: 100%; height: 100%; place-items: center; background: #fff; font-size: 18px; text-align: center; padding: 24px; }
     .photo.failed img { display: none; }
     .photo.failed .fallback { display: grid; }
     button { position: absolute; top: max(20px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); z-index: 2; font: 700 16px Arial, sans-serif; color: #111; background: #fff; border: 1px solid #ddd; border-radius: 999px; padding: 12px 20px; cursor: pointer; }
     button:hover { background: #f1f1f1; }
     button:focus-visible, a:focus-visible { outline: 3px solid #111; outline-offset: 4px; }
-    .credit { position: absolute; z-index: 2; right: max(20px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); margin: 0; padding: 6px 10px; background: #fff; color: #111; border-radius: 6px; font-size: 13px; }
-    .credit a { color: inherit; text-underline-offset: 3px; }
     #status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   </style>
 </head>
@@ -28,11 +26,10 @@
   <main class="stage" id="stage">
     <button id="replay" type="button">Drop again</button>
     <div class="photo" id="photo">
-      <img id="image" src="https://images.unsplash.com/photo-1557800636-894a64c1696f?auto=format&amp;fit=crop&amp;w=2400&amp;q=85" alt="Bright orange fruit against a blue background" draggable="false">
-      <span class="fallback" role="img" aria-label="An orange">🍊</span>
+      <img id="image" src="./pregnant_sans.png" alt="Uploaded Sans illustration" draggable="false">
+      <span class="fallback" role="status">Image could not load. Please refresh.</span>
     </div>
     <p id="status" role="status">Ready for a little gravity?</p>
-    <p class="credit">Photo by <a href="https://unsplash.com/photos/orange-fruit-U1iYwZ8Dx7k" target="_blank" rel="noopener noreferrer">Mae Mu / Unsplash</a></p>
   </main>
   <script>
     const stage = document.getElementById('stage');
